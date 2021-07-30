@@ -1,0 +1,88 @@
+
+h1{
+    font-family: 'Vollkorn', serif;
+    text-align: center;
+    font-weight: bolder;
+    font-size: 70px;
+    text-decoration: dotted underline;
+    color: white;
+}
+
+body{
+    background-color: black;
+}
+#border{
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 800px;
+    height: 600px;
+    align-items: center;
+    color: white;
+    border: 5px dashed;
+    
+}
+h2{
+    font-family: 'Vollkorn', serif;
+  text-align: center;
+  margin-top: 50px;
+  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
+  color:black
+   
+}
+
+#start{
+    margin-left: 350px;
+    align-self: center;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 25px;
+    font-family:  'Vollkorn', serif;
+    font: bolder;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: white;
+    background-color: black;
+    border-color: white;
+    display: grid;
+    
+}
+#exit{
+    margin-left: 350px;
+    margin-top: 20px;
+border-radius: 5px;
+    font-size: 25px;
+    font-family:  'Vollkorn', serif;
+    font: bolder;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: white;
+    background-color: black;
+    border-color: white;
+    display: grid;
+}
+#sound{
+    margin-left: 330;
+    margin-top: 20px;
+    border-radius: 5px;
+    font-size: 25px;
+    font-family:  'Vollkorn', serif;
+    font: bolder;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: white;
+    background-color: black;
+    border-color: white;
+    display: grid;
+}
+
+#sound :hover{
+    
+    color: red
+}

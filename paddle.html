@@ -1,0 +1,317 @@
+<html>
+    <title> paddle game </title>
+    <style>
+        body{
+            text-align: center;
+            background-color: grey;
+        }
+    </style>
+    <body>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <script>
+            //  initial varable declaration.
+            var g_canvas, g_ctx;
+            var g_defaultXpos = 0;
+            var g_defaultYpos = 0;
+            var g_canvasWidth, g_canvasHeight,g_canvasColor;
+            var g_paddleDistFromEdge = 40;  
+            var g_bricksLeft = 0;       
+                    
+            
+            //interval for every frame.
+            var g_fps = 30;
+            var g_setInterval = 1000/g_fps;
+
+            window.onload = function(){
+                // canvas related data.
+                g_canvas = document.getElementById('gameCanvas');
+                g_ctx = g_canvas.getContext('2d');
+                g_canvasWidth = g_canvas.width;
+                g_canvasHeight = g_canvas.height;
+            
+                g_canvasColor = 'black'; // canvas background color.
+
+                //function that draws the canvas.
+                function f_drawCanvas(l_ctx,l_xPos,l_yPos,l_canvasWidth,l_canvasHeight,l_color){
+                    //draw the initial Canvas.
+                    l_ctx.fillStyle = l_color;
+                    l_ctx.strokeRect(l_xPos,l_yPos,l_canvasWidth,l_canvasHeight);
+                    l_ctx.fillRect(l_xPos,l_yPos,l_canvasWidth,l_canvasHeight);
+                }
+                
+                class c_ball{ // All ball related properties and methods.(the Main Ball Class)
+                    constructor(l_radius,l_ballColor,l_xpos,l_ypos,l_canvasWidth,l_canvasHeight){
+                        //basic properties of a ball.
+                        this.r = l_radius;
+                        this.x = l_xpos;
+                        this.y = l_ypos;
+                        this.c = l_ballColor; 
+                        this.xSpeed = 5;
+                        this.ySpeed = 5;
+                        this.canvasWidth = l_canvasWidth;
+                        this.canvasHeight = l_canvasHeight; 
+                        this.bottomFlag = false;      
+
+                    }
+                    drawBall(l_ctx){ // drawBall method.
+                        l_ctx.beginPath();
+                        l_ctx.fillStyle = this.c;
+                        l_ctx.arc(this.x,this.y,this.r,0,Math.PI*2,true);// drawing a circle.
+                        l_ctx.fill();
+                    }
+                    ballMotion(){
+                        this.x+=this.xSpeed;
+                        this.y+=this.ySpeed;
+                       // console.log(`This is the xpos =${this.x}, This is the ypos = ${this.y}`);
+                    }
+                    ballreset(){
+                        if(this.bottomFlag){
+                        this.x= this.canvasWidth/2;
+                        this.y= this.canvasHeight/2;
+                        this.bottomFlag = false;
+                        f_brickFlags();
+                        }
+                    }
+                    ballCollision(){
+                        // x direction collision
+                        if(this.x > this.canvasWidth){// right collision.
+                            this.xSpeed *= -1;
+                            //console.log('Right Collision Detected');
+                        }
+                        else if(this.x < 0 && this.xSpeed < 0.0){ // left collision.
+                            this.xSpeed *= -1;
+                            //console.log('left Collison Detected');
+                        }
+
+                        //y direction collision.
+                        if(this.y > this.canvasHeight){ // Bottom collison.
+                            this.ySpeed *= -1;
+                            //console.log('bottom Collision Detected and ball position Reset');
+                            this.bottomFlag = true;
+                        }
+                        if(this.y < 0){ // top collisioon Detected.
+                            this.ySpeed *= -1; 
+                            //console.log('top collsion Detected');
+                        }
+                    }
+                    
+                }
+
+                // paddle Class.
+                class c_paddle{
+                    constructor(l_PaddleXpos,l_paddleYpos,l_paddleWidth,l_paddleHeight,l_color){
+                        this.x = l_PaddleXpos;
+                        this.y = l_paddleYpos;
+                        this.width = l_paddleWidth;
+                        this.height = l_paddleHeight;
+                        this.color = l_color;
+                    }
+
+                    drawPaddle(l_ctx){
+                        l_ctx.fillStyle = this.color;
+                        l_ctx.fillRect(this.x,this.y, this.width,this.height);
+                    }
+                }
+
+                function f_fillText(l_ctx,l_showWords,l_textX,l_textY,l_color){
+                    l_ctx.fillStyle = l_color;
+                    l_ctx.fillText(l_showWords,l_textX,l_textY);
+                }
+           
+                //creating ball object.
+                    var g_ballxpos = g_canvasWidth/2;
+                    var g_ballypos = g_canvasHeight/2;
+                    var g_ballRadius = 10;
+                    var g_ballColor = 'white';
+                    var g_ball = new c_ball(g_ballRadius,g_ballColor,g_ballxpos,g_ballypos,g_canvasWidth,g_canvasHeight);
+                    function f_BallMethods(){ // All ball methods.
+                         g_ball.ballreset();
+                        // draws the ball.
+                        g_ball.drawBall(g_ctx);
+                         // puts the ball into motion.
+                        g_ball.ballMotion();
+                         // detects ball colision.
+                        g_ball.ballCollision();
+                    }
+
+                // creating the Paddle.
+                    var g_paddleXpos = 400;
+                    var g_paddleYpos = g_canvasHeight - g_paddleDistFromEdge;
+                    var g_paddleColor = 'white';
+                    const g_paddleWidth = 100;
+                    const g_paddleHeight = 10;
+                    // paddle x = mouse position.
+                    var mouseX;
+                    var mouseY;
+                    function f_updateMousePos(event){
+                        
+                        var rect = g_canvas.getBoundingClientRect();
+                        var root = document.documentElement;
+                        
+                         mouseX = event.clientX - rect.left - root.scrollLeft;
+                         mouseY = event.clientY - rect.top - root.scrollTop;
+                        g_paddleXpos = mouseX - g_paddleWidth/2;
+                        //console.log('working');
+                       
+                       // testing hack.
+                        // g_ball.x = mouseX;
+                        // g_ball.y = mouseY;
+                        // g_ball.xSpeed = 3;
+                        // g_ball.ySpeed = -4;
+                    } 
+                    function f_isBrickAtColRow(col,row){
+                        if(col >= 0 && col < g_brickCount &&
+                        row >=0 && row < g_brickRow){
+                            var g_indexUndercoord = f_rowColumnToArrayIndex(col,row);
+                            return  g_brickFlags[g_indexUndercoord];
+                        }
+                        else{
+                            return false;
+
+                        }
+                    }
+                  
+                    // ball and paddle collision.
+                    function f_paddelAndBallCollision(){
+                        var g_paddleTopEdgeY = g_canvasHeight-g_paddleDistFromEdge;
+                        var g_paddleBottemEdgeY = g_paddleTopEdgeY + g_paddleHeight;
+                        var g_paddleLeftEdgeX = g_paddleXpos;
+                        var g_paddleRightedgeX = g_paddleLeftEdgeX + g_paddleWidth;
+                            //console.log('running');
+                        if( g_ball.y > g_paddleTopEdgeY && // bellow the top of the paddel
+                            g_ball.y < g_paddleBottemEdgeY && // above the top of the paddel.
+                            g_ball.x > g_paddleLeftEdgeX &&// right of the left side of paddel.
+                            g_ball.x < g_paddleRightedgeX){ // left of the right side of paddel.
+                           
+                                g_ball.ySpeed *= -1;
+                                //console.log('collsion width paddel Detected.');
+
+                                var g_centerOfPaddelX = g_paddleXpos + g_paddleWidth/2;
+                                var g_ballDistFromThePadelCenterX = g_ball.x - g_centerOfPaddelX;
+                                g_ball.xSpeed = g_ballDistFromThePadelCenterX * 0.30;
+                                console.log(`distance from Center :${g_ballDistFromThePadelCenterX}`)
+                               
+                               if(g_bricksLeft == 0){
+                                    f_brickFlags();
+                                }
+                            }
+                        
+                        
+                    }
+                
+       
+                    function f_paddleMethods(){
+                        // creates a paddle.
+                        var g_paddle = new c_paddle(g_paddleXpos,g_paddleYpos,g_paddleWidth,g_paddleHeight,g_paddleColor);
+                        g_paddle.drawPaddle(g_ctx);
+                
+                    }
+
+                    // brick Variables.
+                    var g_brickWidth = 80;
+                    var g_brickHeight = 20;
+                    var g_brickFlags = [g_brickCount * g_brickRow];
+                    var g_brickCount = 10;
+                    var g_brickRow = 14;
+                    
+                    function f_brickFlags(){
+                        var i;
+                        for(i = 0; i <  3 * g_brickCount; i++){
+                            g_brickFlags[i] = false;
+                        }
+                       
+                        for(;i < g_brickCount * g_brickRow;i++){
+                            // if(Math.random() < 0.5){
+                            //     g_brickFlags[i] = true;
+                            // }
+                            // else{
+                            //     g_brickFlags[i] = false; 
+               
+                        g_brickFlags[i] = true;  
+                        g_bricksLeft++;   
+                          
+                    }
+                }
+                
+                f_brickFlags();
+                function f_rowColumnToArrayIndex(col,row){
+                    return col + g_brickCount * row;
+                }
+                
+                    function f_drawBricks(l_ctx){ // function draws the bricks.
+                        for(var j = 0;j< g_brickRow;j++){
+                            
+                            for(var i = 0; i < g_brickCount; i++){
+
+                                var arrayIndex = f_rowColumnToArrayIndex(i,j);
+
+                                if(g_brickFlags[arrayIndex]){
+                                l_ctx.fillStyle = 'blue';
+                                l_ctx.fillRect(g_brickWidth * i,g_brickHeight*j,g_brickWidth - 2,g_brickHeight-2);
+                                }
+                            }                     
+                        }  
+                    }
+                    function f_ballandBrickCollison(){
+                        f_fillText(g_ctx,g_brickCol +','+ g_brickRow + 'Ind:'+ g_indexUnderMouse,mouseX,mouseY,'yellow');
+                        var g_brickCol = Math.floor(g_ball.x/g_brickWidth);
+                        var g_bricksRow = Math.floor(g_ball.y/g_brickHeight);
+                        var g_indexUnderMouse = f_rowColumnToArrayIndex(g_brickCol,g_bricksRow);
+                    
+                    if(g_brickCol >= 0 && g_brickCol < g_brickCount &&
+                        g_bricksRow >=0 && g_bricksRow < g_brickRow){
+                            
+                            if(f_isBrickAtColRow(g_brickCol,g_bricksRow)){
+
+                                g_brickFlags[g_indexUnderMouse] = false;
+                                g_bricksLeft--;
+                                //console.log(g_bricksLeft);
+                                //g_ball.ySpeed *= -1;
+                                var g_prevBallX = g_ball.x - g_ball.xSpeed;
+                                var g_prevBallY = g_ball.y - g_ball.ySpeed;
+                                var g_prevbrickCol = Math.floor(g_prevBallX/g_brickWidth);
+                                var g_prevbrickRow = Math.floor(g_prevBallY/g_brickHeight);
+                                var g_bothTestFailed = true;
+                                
+                                if(g_prevbrickCol != g_brickCol){
+            
+                                    if(f_isBrickAtColRow(g_brickCol,g_bricksRow)== false){
+                                        g_ball.xSpeed *= -1;
+                                        g_bothTestFailed = false;
+                                    }
+                                }
+                                if(g_prevbrickRow != g_bricksRow){
+                                   
+                                    if(f_isBrickAtColRow(g_brickCol,g_bricksRow) == false){
+                                        g_ball.ySpeed *= -1;
+                                        g_bothTestFailed = false;
+                                    }
+                                }
+                                if(g_bothTestFailed){
+                                    g_ball.xSpeed *= -1;
+                                    g_ball.ySpeed *= -1;
+                                }
+
+                            }
+                        }
+                    }
+                   
+                g_canvas.addEventListener('mousemove',f_updateMousePos);
+                    
+                //gameLoop
+                function f_gameLoop(){ 
+                   
+                    f_ballandBrickCollison();
+                    f_drawCanvas(g_ctx,g_defaultXpos,g_defaultYpos,g_canvasWidth,g_canvasHeight,g_canvasColor); // clear screen.
+                    f_drawBricks(g_ctx);
+                    f_BallMethods();
+                    f_paddleMethods();
+                    f_paddelAndBallCollision();
+          
+                }
+
+                setInterval(f_gameLoop,g_setInterval);
+            }
+        </script>
+    </body>
+</html>
